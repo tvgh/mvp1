@@ -35,18 +35,17 @@ export function Layout({ children }: { children: ReactNode }) {
           }}
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          New Task
+          新建任务
         </button>
 
         {/* Navigation Tabs */}
         <nav className="flex-1 flex flex-col gap-xs font-body-md text-body-md">
           <Link
             to="/"
-            className={`${
-              isNavActive('/')
-                ? 'bg-secondary-container text-on-secondary-container'
-                : 'text-on-surface-variant hover:bg-surface-container-high'
-            } rounded-xl flex items-center gap-sm py-sm px-md active:scale-[0.98] transition-transform`}
+            className={`${isNavActive('/')
+              ? 'bg-secondary-container text-on-secondary-container'
+              : 'text-on-surface-variant hover:bg-surface-container-high'
+              } rounded-xl flex items-center gap-sm py-sm px-md active:scale-[0.98] transition-transform`}
           >
             <span
               className="material-symbols-outlined"
@@ -54,28 +53,28 @@ export function Layout({ children }: { children: ReactNode }) {
             >
               assignment_turned_in
             </span>
-            Tasks
+            编码任务
           </Link>
           <a
             href="#"
             className="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-sm py-sm px-md active:scale-[0.98] transition-transform"
           >
             <span className="material-symbols-outlined">apps</span>
-            Applications
+            反馈池
           </a>
           <a
             href="#"
             className="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-sm py-sm px-md active:scale-[0.98] transition-transform"
           >
             <span className="material-symbols-outlined">dns</span>
-            Environments
+            项目管理
           </a>
           <a
             href="#"
             className="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-sm py-sm px-md active:scale-[0.98] transition-transform"
           >
             <span className="material-symbols-outlined">terminal</span>
-            Logs
+            系统日志
           </a>
         </nav>
 
@@ -86,14 +85,14 @@ export function Layout({ children }: { children: ReactNode }) {
             className="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-sm py-sm px-md active:scale-[0.98] transition-transform"
           >
             <span className="material-symbols-outlined">settings</span>
-            Settings
+            系统设置
           </a>
           <a
             href="#"
             className="text-on-surface-variant hover:bg-surface-container-high rounded-xl flex items-center gap-sm py-sm px-md active:scale-[0.98] transition-transform"
           >
             <span className="material-symbols-outlined">help_outline</span>
-            Support
+            帮助支持
           </a>
         </div>
       </aside>
@@ -115,21 +114,21 @@ export function Layout({ children }: { children: ReactNode }) {
             </span>
             <input
               className="input-light w-full pl-8 pr-sm py-[6px] rounded border font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-0 placeholder-on-surface-variant"
-              placeholder="Search tasks, IDs..."
+              placeholder="搜索任务、ID..."
               type="text"
             />
           </div>
           <div className="flex items-center gap-md">
             {/* Navigation Links */}
             <span className="font-label-md text-label-md uppercase text-on-surface-variant hidden md:inline-block">
-              Status: 8/12 Envs Active
+              状态：8/12 环境运行中
             </span>
             {/* Trailing Icon Actions */}
             <div className="flex items-center gap-sm">
               <button
                 className="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer active:opacity-80 p-xs rounded-full hover:bg-surface-variant"
                 onClick={() => document.documentElement.classList.toggle('dark')}
-                title="Toggle Theme"
+                title="切换主题"
               >
                 <span className="material-symbols-outlined">dark_mode</span>
               </button>
@@ -140,10 +139,6 @@ export function Layout({ children }: { children: ReactNode }) {
                 <span className="material-symbols-outlined">account_circle</span>
               </button>
             </div>
-            {/* Trailing Primary Action */}
-            <button className="bg-primary-container text-white font-label-md text-label-md uppercase px-md py-sm rounded hidden sm:block hover:bg-primary transition-colors">
-              Deploy All
-            </button>
           </div>
         </header>
 

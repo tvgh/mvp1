@@ -69,6 +69,9 @@ function step(task: Task) {
     }
 
     case 'planning': {
+      const msSinceUpdate = Date.now() - new Date(task.updatedAt).getTime();
+      if (msSinceUpdate < 3000) break;
+
       if (pickFailure()) {
         task.failReason = 'LLM 生成 Plan 超时';
         transition(task, 'failed_plan', task.failReason);
@@ -93,6 +96,9 @@ function step(task: Task) {
       return;
 
     case 'coding': {
+      const msSinceUpdate = Date.now() - new Date(task.updatedAt).getTime();
+      if (msSinceUpdate < 12000) break;
+
       transition(task, 'patch_checking', '生成代码并执行 git apply --check');
       break;
     }

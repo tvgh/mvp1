@@ -63,4 +63,9 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ feedback }),
     }),
+  cancelTask: (id: string) =>
+    jsonFetch<{ task: Task }>(`/api/aiwx/tasks/${id}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status: 'cancelled', message: 'User stopped the task' }),
+    }),
 };
