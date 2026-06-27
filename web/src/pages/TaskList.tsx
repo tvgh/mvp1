@@ -94,7 +94,7 @@ export function TaskList() {
           <div className="col-span-2">Status</div>
           <div className="col-span-2 text-right">Updated</div>
         </div>
-        
+
         {/* Table Body */}
         <div className="divide-y divide-outline-variant">
           {tasks.map((t) => (

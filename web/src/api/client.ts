@@ -51,6 +51,11 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ feedback }),
     }),
+  startTask: (id: string, options?: Partial<Task>) =>
+    jsonFetch<{ ok: true }>(`/api/aiwx/tasks/${id}/start`, { 
+      method: 'POST',
+      body: options ? JSON.stringify(options) : undefined
+    }),
   testPass: (id: string) =>
     jsonFetch<{ ok: true }>(`/api/aiwx/tasks/${id}/test/pass`, { method: 'POST' }),
   testFail: (id: string, feedback: string) =>

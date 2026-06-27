@@ -89,6 +89,28 @@ tasksRouter.post('/tasks/:id/status', (req, res) => {
   res.json({ task });
 });
 
+tasksRouter.post('/tasks/:id/start', (req, res) => {
+  const task = store.tasks.get(req.params.id);
+  if (!task) return res.status(404).json({ error: 'not found' });
+  
+  if (task.status !== 'pending_start') {
+    return res.status(400).json({ error: '只能加入处于待开始状态的任务' });
+  }
+
+  const body = req.body ?? {};
+  if (body.projectId) task.projectId = body.projectId;
+  if (body.requirementId) task.requirementId = body.requirementId;
+  if (body.title) task.title = body.title;
+  if (body.content !== undefined) task.content = body.content;
+  if (body.appId) task.appId = body.appId;
+  if (body.planMode !== undefined) task.planMode = body.planMode;
+  if (body.baseBranch) task.baseBranch = body.baseBranch;
+
+  const r = transition(task, 'queued', '用户手动加入队列', 'user');
+  if (!r.ok) return res.status(400).json({ error: r.reason });
+  res.json({ ok: true });
+});
+
 tasksRouter.post('/tasks/:id/plan/confirm', (req, res) => {
   const r = confirmPlan(req.params.id);
   if (!r.ok) return res.status(400).json({ error: r.reason });

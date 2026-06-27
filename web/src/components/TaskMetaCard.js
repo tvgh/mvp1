@@ -1,0 +1,9 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Card } from './Card';
+import { StatusBadge } from './StatusBadge';
+function Row({ label, value }) {
+    return (_jsxs("div", { className: "grid grid-cols-[120px_1fr] gap-2 py-1.5 text-sm", children: [_jsx("div", { className: "text-on-surface-variant", children: label }), _jsx("div", { className: "font-mono text-on-surface break-all", children: value ?? '—' })] }));
+}
+export function TaskMetaCard({ task, app }) {
+    return (_jsxs(Card, { title: _jsxs("span", { className: "flex items-center gap-2", children: [_jsx("span", { children: task.title }), _jsx(StatusBadge, { status: task.status })] }), right: _jsxs("span", { className: "text-xs text-on-surface-variant", children: [task.requirementId, " \u00B7 ", task.id] }), children: [_jsx("p", { className: "mb-3 whitespace-pre-line text-sm text-on-surface", children: task.content }), _jsxs("div", { className: "divide-y divide-outline-variant", children: [_jsx(Row, { label: "\u9879\u76EE", value: task.projectId }), _jsx(Row, { label: "\u5E94\u7528", value: app ? `${app.appName} (${app.appId})` : task.appId }), _jsx(Row, { label: "Git \u4ED3\u5E93", value: app?.gitUrl }), _jsx(Row, { label: "\u4E3B\u5206\u652F", value: task.baseBranch ?? app?.defaultBranch }), _jsx(Row, { label: "baseCommit", value: task.baseCommit }), _jsx(Row, { label: "AI \u5206\u652F", value: task.branchName }), _jsx(Row, { label: "\u6C99\u7BB1 ID", value: task.sandboxId }), _jsx(Row, { label: "Plan \u6A21\u5F0F", value: task.planMode ? '开启' : '关闭' }), _jsx(Row, { label: "MR \u5730\u5740", value: task.mrUrl ? (_jsx("a", { className: "text-primary hover:underline", href: task.mrUrl, target: "_blank", children: task.mrUrl })) : ('—') }), task.failReason && (_jsx(Row, { label: "\u5931\u8D25\u539F\u56E0", value: _jsx("span", { className: "text-error", children: task.failReason }) }))] })] }));
+}
