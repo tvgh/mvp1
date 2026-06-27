@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { Breadcrumb } from '../components/Breadcrumb';
 import { Card } from '../components/Card';
 import { CodeReviewPanel } from '../components/CodeReviewPanel';
 import { LogList } from '../components/LogList';
@@ -13,13 +14,20 @@ export function TaskDetail() {
   const { id } = useParams<{ id: string }>();
   const { detail, logs, error, refresh } = useTask(id);
 
+  const breadcrumbItems = [
+    { label: '首页', to: '/' },
+    { label: '任务列表', to: '/' },
+    { label: id ? `任务 ${id}` : '任务详情' },
+  ];
+
   if (error) {
     return (
       <div className="mx-auto max-w-7xl px-6 py-6">
-        <Link to="/" className="text-sm text-primary hover:underline">
+        <Breadcrumb items={breadcrumbItems} />
+        <p className="mt-4 text-error">加载失败：{error}</p>
+        <Link to="/" className="mt-2 inline-block text-sm text-primary hover:underline">
           ← 返回任务列表
         </Link>
-        <p className="mt-4 text-error">加载失败：{error}</p>
       </div>
     );
   }
@@ -27,9 +35,7 @@ export function TaskDetail() {
   if (!detail) {
     return (
       <div className="mx-auto max-w-7xl px-6 py-6 text-sm text-on-surface-variant">
-        <Link to="/" className="text-primary hover:underline">
-          ← 返回任务列表
-        </Link>
+        <Breadcrumb items={breadcrumbItems} />
         <p className="mt-4">加载中…</p>
       </div>
     );
@@ -40,9 +46,7 @@ export function TaskDetail() {
   return (
     <div className="mx-auto max-w-7xl px-6 py-6">
       <header className="mb-4 flex items-center justify-between">
-        <Link to="/" className="text-sm text-primary hover:underline">
-          ← 返回任务列表
-        </Link>
+        <Breadcrumb items={breadcrumbItems} />
         <span className="text-xs text-on-surface-variant">每秒刷新一次</span>
       </header>
 
@@ -54,7 +58,7 @@ export function TaskDetail() {
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="lg:col-span-1 space-y-4">
-          <TaskMetaCard task={task} app={app} />
+          <TaskMetaCard task={task} app={app} onChange={refresh} />
           <MRPanel task={task} />
         </div>
         <div className="lg:col-span-2 space-y-4">

@@ -1,4 +1,5 @@
 export type TaskStatus =
+  | 'pending_start'
   | 'queued'
   | 'locking_baseline'
   | 'preparing_sandbox'

@@ -4,3 +4,6 @@ dist
 *.log
 .env
 .env.local
+
+# Stray tsc emit alongside .tsx/.ts sources (build artifacts only — entry is index.html → main.tsx)
+web/src/**/*.js

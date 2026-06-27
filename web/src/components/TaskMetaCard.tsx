@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { AppInfo, Task } from '../api/types';
+import type { AppInfo, Task, TaskStatus } from '../api/types';
 import { api } from '../api/client';
 import { Card } from './Card';
 import { StatusBadge } from './StatusBadge';
@@ -22,14 +22,58 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function StartTaskDialog({
+const inputClass =
+  'w-full rounded border border-outline-variant bg-surface px-2 py-1.5 text-sm text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20 disabled:opacity-60 disabled:cursor-not-allowed';
+
+interface JoinQueueButtonState {
+  label: string;
+  enabled: boolean;
+}
+
+function getJoinQueueButtonState(status: TaskStatus): JoinQueueButtonState {
+  switch (status) {
+    case 'pending_start':
+      return { label: '加入队列', enabled: true };
+    case 'queued':
+      return { label: '已在队列', enabled: false };
+    case 'locking_baseline':
+    case 'preparing_sandbox':
+    case 'planning':
+    case 'coding':
+    case 'patch_checking':
+    case 'pushing_branch':
+    case 'deploying':
+    case 'creating_mr':
+    case 'destroying_env':
+      return { label: '任务执行中', enabled: false };
+    case 'plan_pending_confirm':
+    case 'code_pending_review':
+    case 'testing_pending':
+    case 'mr_pending_merge':
+      return { label: '等待用户操作', enabled: false };
+    case 'completed':
+      return { label: '已完成', enabled: false };
+    case 'cancelled':
+      return { label: '已取消', enabled: false };
+    case 'failed_baseline':
+    case 'failed_plan':
+    case 'failed_patch':
+    case 'failed_push':
+    case 'failed_pipeline':
+    case 'failed_mr':
+    case 'failed_destroy_env':
+      return { label: '已失败', enabled: false };
+  }
+}
+
+export function TaskMetaCard({
   task,
-  onClose,
-  onStarted,
+  app,
+  onChange,
 }: {
   task: Task;
-  onClose: () => void;
-  onStarted: () => void;
+  app?: AppInfo;
+  onChange?: () => void;
 }) {
   const [apps, setApps] = useState<AppInfo[]>([]);
   const [projectId, setProjectId] = useState(task.projectId);
@@ -46,6 +90,21 @@ function StartTaskDialog({
     api.listApps().then((r) => setApps(r.apps));
   }, []);
 
+  useEffect(() => {
+    setProjectId(task.projectId);
+    setRequirementId(task.requirementId);
+    setTitle(task.title);
+    setContent(task.content);
+    setAppId(task.appId);
+    setPlanMode(task.planMode);
+    setBaseBranch(task.baseBranch || '');
+    setErr(null);
+  }, [task.id, task.status]);
+
+  const editable = task.status === 'pending_start';
+  const buttonState = getJoinQueueButtonState(task.status);
+  const canSubmit = buttonState.enabled && !busy && !!title.trim();
+
   const submit = async () => {
     setBusy(true);
     setErr(null);
@@ -59,7 +118,7 @@ function StartTaskDialog({
         planMode,
         baseBranch: baseBranch || undefined,
       });
-      onStarted();
+      onChange?.();
     } catch (e: any) {
       setErr(e.message);
     } finally {
@@ -68,134 +127,94 @@ function StartTaskDialog({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
-      onClick={onClose}
+    <Card
+      title={
+        <span className="flex items-center gap-2">
+          <span>{task.title}</span>
+          <StatusBadge status={task.status} />
+        </span>
+      }
+      right={
+        <span className="text-xs text-on-surface-variant">
+          {task.requirementId} · {task.id}
+        </span>
+      }
     >
-      <div
-        className="w-full max-w-md rounded-lg border border-outline-variant bg-surface-container p-5 shadow-xl text-on-surface flex flex-col max-h-[90vh]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2 className="mb-3 text-base font-semibold shrink-0">确认并加入队列</h2>
-        <div className="space-y-3 text-sm overflow-auto pr-2 flex-1">
-          <Field label="项目 ID">
-            <input
-              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-              value={projectId}
-              onChange={(e) => setProjectId(e.target.value)}
-            />
-          </Field>
-          <Field label="需求 ID">
-            <input
-              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-              value={requirementId}
-              onChange={(e) => setRequirementId(e.target.value)}
-            />
-          </Field>
-          <Field label="标题">
-            <input
-              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </Field>
-          <Field label="需求正文">
-            <textarea
-              rows={3}
-              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-            />
-          </Field>
-          <Field label="应用">
-            <select
-              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-              value={appId}
-              onChange={(e) => setAppId(e.target.value)}
-            >
-              {apps.map((a) => (
-                <option key={a.appId} value={a.appId}>
-                  {a.appName} ({a.appId})
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="目标分支 (选填)">
-            <input
-              placeholder="默认使用应用配置的主分支"
-              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-              value={baseBranch}
-              onChange={(e) => setBaseBranch(e.target.value)}
-            />
-          </Field>
-          <label className="flex items-center gap-2 mt-2">
-            <input
-              type="checkbox"
-              checked={planMode}
-              onChange={(e) => setPlanMode(e.target.checked)}
-            />
-            <span>开启 Plan 模式</span>
-          </label>
-        </div>
-        {err && <p className="mt-2 text-xs text-error shrink-0">{err}</p>}
-        <div className="mt-4 flex justify-end gap-2 shrink-0">
-          <button
-            onClick={onClose}
-            className="rounded border border-outline px-3 py-1.5 text-sm text-on-surface hover:bg-surface-bright"
+      <div className="space-y-3">
+        <Field label="项目 ID">
+          <input
+            className={inputClass}
+            value={projectId}
+            disabled={!editable}
+            onChange={(e) => setProjectId(e.target.value)}
+          />
+        </Field>
+        <Field label="需求 ID">
+          <input
+            className={inputClass}
+            value={requirementId}
+            disabled={!editable}
+            onChange={(e) => setRequirementId(e.target.value)}
+          />
+        </Field>
+        <Field label="标题">
+          <input
+            className={inputClass}
+            value={title}
+            disabled={!editable}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+        </Field>
+        <Field label="需求正文">
+          <textarea
+            rows={4}
+            className={inputClass}
+            value={content}
+            disabled={!editable}
+            onChange={(e) => setContent(e.target.value)}
+          />
+        </Field>
+        <Field label="应用">
+          <select
+            className={inputClass}
+            value={appId}
+            disabled={!editable}
+            onChange={(e) => setAppId(e.target.value)}
           >
-            取消
-          </button>
-          <button
-            disabled={busy || !title}
-            onClick={submit}
-            className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-on-primary disabled:opacity-50"
-          >
-            加入队列
-          </button>
-        </div>
+            {apps.length === 0 && <option value={appId}>{appId}</option>}
+            {apps.map((a) => (
+              <option key={a.appId} value={a.appId}>
+                {a.appName} ({a.appId})
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="目标分支 (选填)">
+          <input
+            placeholder="默认使用应用配置的主分支"
+            className={inputClass}
+            value={baseBranch}
+            disabled={!editable}
+            onChange={(e) => setBaseBranch(e.target.value)}
+          />
+        </Field>
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={planMode}
+            disabled={!editable}
+            onChange={(e) => setPlanMode(e.target.checked)}
+          />
+          <span>开启 Plan 模式</span>
+        </label>
       </div>
-    </div>
-  );
-}
 
-export function TaskMetaCard({ task, app, onChange }: { task: Task; app?: AppInfo; onChange?: () => void }) {
-  const [showStart, setShowStart] = useState(false);
-
-  return (
-    <>
-      <Card
-        title={
-          <span className="flex items-center gap-2">
-            <span>{task.title}</span>
-            <StatusBadge status={task.status} />
-          </span>
-        }
-        right={
-          <div className="flex items-center gap-3">
-            {task.status === 'pending_start' && (
-              <button
-                onClick={() => setShowStart(true)}
-                className="px-3 py-1 bg-primary text-on-primary font-medium rounded text-xs hover:opacity-90 transition-opacity"
-              >
-                加入队列
-              </button>
-            )}
-            <span className="text-xs text-on-surface-variant">
-              {task.requirementId} · {task.id}
-            </span>
-          </div>
-        }
-      >
-        <p className="mb-3 whitespace-pre-line text-sm text-on-surface">{task.content}</p>
+      <div className="mt-4 border-t border-outline-variant pt-3">
         <div className="divide-y divide-outline-variant">
-          <Row label="项目" value={task.projectId} />
-          <Row label="应用" value={app ? `${app.appName} (${app.appId})` : task.appId} />
           <Row label="Git 仓库" value={app?.gitUrl} />
-          <Row label="主分支" value={task.baseBranch ?? app?.defaultBranch} />
           <Row label="baseCommit" value={task.baseCommit} />
           <Row label="AI 分支" value={task.branchName} />
           <Row label="沙箱 ID" value={task.sandboxId} />
-          <Row label="Plan 模式" value={task.planMode ? '开启' : '关闭'} />
           <Row
             label="MR 地址"
             value={
@@ -215,17 +234,19 @@ export function TaskMetaCard({ task, app, onChange }: { task: Task; app?: AppInf
             />
           )}
         </div>
-      </Card>
-      {showStart && (
-        <StartTaskDialog
-          task={task}
-          onClose={() => setShowStart(false)}
-          onStarted={() => {
-            setShowStart(false);
-            onChange?.();
-          }}
-        />
-      )}
-    </>
+      </div>
+
+      {err && <p className="mt-3 text-xs text-error">{err}</p>}
+
+      <div className="mt-4 flex justify-end">
+        <button
+          disabled={!canSubmit}
+          onClick={submit}
+          className="rounded bg-primary px-4 py-1.5 text-sm font-medium text-on-primary disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {busy ? '提交中…' : buttonState.label}
+        </button>
+      </div>
+    </Card>
   );
 }

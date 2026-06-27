@@ -1,6 +1,7 @@
 import { Task, TaskStatus, appendLog, nowISO, store } from './store.js';
 
 const ALLOWED: Record<TaskStatus, TaskStatus[]> = {
+  pending_start: ['queued', 'cancelled'],
   queued: ['locking_baseline', 'cancelled'],
   locking_baseline: ['preparing_sandbox', 'failed_baseline'],
   preparing_sandbox: ['planning', 'coding', 'failed_baseline'],

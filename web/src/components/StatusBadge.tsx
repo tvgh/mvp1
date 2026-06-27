@@ -1,6 +1,7 @@
 import type { TaskStatus } from '../api/types';
 
 const LABEL: Record<TaskStatus, string> = {
+  pending_start: '待开始',
   queued: '待处理',
   locking_baseline: '基线锁定中',
   preparing_sandbox: '沙箱准备中',
@@ -33,7 +34,7 @@ function getBadgeConfig(status: TaskStatus) {
       icon: <span className="material-symbols-outlined text-[14px]">check_circle</span>,
     };
   }
-  if (status === 'cancelled' || status === 'queued') {
+  if (status === 'cancelled' || status === 'queued' || status === 'pending_start') {
     return {
       className: 'badge-queued border-slate-200',
       icon: <span className="material-symbols-outlined text-[14px]">schedule</span>,
