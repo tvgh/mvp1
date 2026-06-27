@@ -10,12 +10,12 @@ export function Card({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-lg border border-gray-200 bg-white shadow-sm">
-      <header className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-        <h3 className="text-sm font-semibold text-gray-800">{title}</h3>
-        {right}
+    <section className="card rounded-xl border flex flex-col">
+      <header className="flex items-center justify-between border-b border-outline-variant px-md py-sm">
+        <h3 className="font-label-md text-label-md text-on-surface uppercase">{title}</h3>
+        {right && <div className="text-primary-container">{right}</div>}
       </header>
-      <div className="p-4">{children}</div>
+      <div className="p-md">{children}</div>
     </section>
   );
 }

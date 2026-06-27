@@ -16,18 +16,18 @@ export function TaskDetail() {
   if (error) {
     return (
       <div className="mx-auto max-w-7xl px-6 py-6">
-        <Link to="/" className="text-sm text-blue-600 hover:underline">
+        <Link to="/" className="text-sm text-primary hover:underline">
           ← 返回任务列表
         </Link>
-        <p className="mt-4 text-red-600">加载失败：{error}</p>
+        <p className="mt-4 text-error">加载失败：{error}</p>
       </div>
     );
   }
 
   if (!detail) {
     return (
-      <div className="mx-auto max-w-7xl px-6 py-6 text-sm text-gray-500">
-        <Link to="/" className="text-blue-600 hover:underline">
+      <div className="mx-auto max-w-7xl px-6 py-6 text-sm text-on-surface-variant">
+        <Link to="/" className="text-primary hover:underline">
           ← 返回任务列表
         </Link>
         <p className="mt-4">加载中…</p>
@@ -40,10 +40,10 @@ export function TaskDetail() {
   return (
     <div className="mx-auto max-w-7xl px-6 py-6">
       <header className="mb-4 flex items-center justify-between">
-        <Link to="/" className="text-sm text-blue-600 hover:underline">
+        <Link to="/" className="text-sm text-primary hover:underline">
           ← 返回任务列表
         </Link>
-        <span className="text-xs text-gray-500">每秒刷新一次</span>
+        <span className="text-xs text-on-surface-variant">每秒刷新一次</span>
       </header>
 
       <div className="mb-4">

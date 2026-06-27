@@ -20,10 +20,10 @@ const HAPPY: TaskStatus[] = [
 ];
 
 function stepClass(idx: number, currentIdx: number, isFailed: boolean) {
-  if (isFailed && idx === currentIdx) return 'bg-red-500 text-white border-red-500';
+  if (isFailed && idx === currentIdx) return 'bg-error text-on-error border-error';
   if (idx < currentIdx) return 'bg-green-500 text-white border-green-500';
-  if (idx === currentIdx) return 'bg-blue-500 text-white border-blue-500 animate-pulse';
-  return 'bg-white text-gray-400 border-gray-300';
+  if (idx === currentIdx) return 'bg-primary text-on-primary border-primary animate-pulse';
+  return 'bg-surface-container text-outline border-outline-variant';
 }
 
 export function StatusTimeline({ status }: { status: TaskStatus }) {
@@ -50,12 +50,12 @@ export function StatusTimeline({ status }: { status: TaskStatus }) {
             >
               {i + 1}
             </div>
-            <div className="text-[11px] whitespace-nowrap text-gray-600 max-w-[88px] truncate">
+            <div className="text-[11px] whitespace-nowrap text-on-surface-variant max-w-[88px] truncate">
               {STATUS_LABEL[s]}
             </div>
             {i < HAPPY.length - 1 && (
               <div
-                className={`h-px w-4 ${i < currentIdx ? 'bg-green-400' : 'bg-gray-300'}`}
+                className={`h-px w-4 ${i < currentIdx ? 'bg-green-500' : 'bg-outline-variant'}`}
               />
             )}
           </li>

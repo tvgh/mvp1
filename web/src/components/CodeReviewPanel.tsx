@@ -24,7 +24,7 @@ export function CodeReviewPanel({
     if (!review?.patchContent) return '';
     return Diff2Html.html(review.patchContent, {
       drawFileList: true,
-      outputFormat: 'side-by-side',
+      outputFormat: 'line-by-line',
       matching: 'lines',
     });
   }, [review?.patchContent]);
@@ -57,7 +57,7 @@ export function CodeReviewPanel({
   if (!review) {
     return (
       <Card title="代码 Review">
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-on-surface-variant">
           {task.status === 'coding' || task.status === 'patch_checking'
             ? '代码与 Patch 生成中…'
             : '尚未生成代码改动。'}
@@ -68,7 +68,7 @@ export function CodeReviewPanel({
 
   return (
     <Card title="代码 Review">
-      <div className="mb-3 flex gap-1 border-b border-gray-100">
+      <div className="mb-3 flex gap-1 border-b border-outline-variant">
         {(
           [
             ['diff', 'Diff'],
@@ -80,11 +80,10 @@ export function CodeReviewPanel({
           <button
             key={k}
             onClick={() => setTab(k)}
-            className={`px-3 py-1.5 text-sm font-medium ${
-              tab === k
-                ? 'border-b-2 border-blue-500 text-blue-700'
-                : 'text-gray-500 hover:text-gray-800'
-            }`}
+            className={`px-3 py-1.5 text-sm font-medium ${tab === k
+                ? 'border-b-2 border-primary text-primary'
+                : 'text-on-surface-variant hover:text-on-surface'
+              }`}
           >
             {label}
           </button>
@@ -93,24 +92,24 @@ export function CodeReviewPanel({
 
       {tab === 'diff' && (
         <div
-          className="overflow-x-auto rounded border border-gray-200 bg-white text-xs"
+          className="overflow-x-auto rounded border border-outline-variant bg-surface text-xs"
           dangerouslySetInnerHTML={{ __html: diffHtml }}
         />
       )}
       {tab === 'patch' && (
-        <pre className="max-h-[480px] overflow-auto rounded bg-gray-900 p-3 text-xs text-gray-100">
+        <pre className="max-h-[480px] overflow-auto rounded bg-[#020617] p-3 text-xs text-on-surface">
           {review.patchContent}
         </pre>
       )}
       {tab === 'summary' && (
-        <p className="whitespace-pre-line text-sm text-gray-700">{review.changeSummary}</p>
+        <p className="whitespace-pre-line text-sm text-on-surface">{review.changeSummary}</p>
       )}
       {tab === 'suggestion' && (
-        <p className="whitespace-pre-line text-sm text-gray-700">{review.testSuggestion}</p>
+        <p className="whitespace-pre-line text-sm text-on-surface">{review.testSuggestion}</p>
       )}
 
       {review.feedback && (
-        <div className="mt-3 rounded border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
+        <div className="mt-3 rounded border border-outline-variant bg-surface-container-high p-2 text-xs text-on-surface">
           上一轮反馈：{review.feedback}
         </div>
       )}
@@ -119,19 +118,19 @@ export function CodeReviewPanel({
         <button
           disabled={!canAct || busy}
           onClick={onConfirm}
-          className="rounded bg-green-600 px-3 py-1.5 text-sm font-medium text-white disabled:bg-gray-300"
+          className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-on-primary disabled:opacity-50"
         >
           确认代码
         </button>
         <button
           disabled={!canAct || busy}
           onClick={() => setShowFeedback((s) => !s)}
-          className="rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="rounded border border-outline px-3 py-1.5 text-sm font-medium text-on-surface hover:bg-surface-bright disabled:opacity-50"
         >
           驳回并填写修改意见
         </button>
         {!canAct && (
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-on-surface-variant">
             {review.status === 'confirmed' ? '已确认' : '当前状态不可操作'}
           </span>
         )}
@@ -139,7 +138,7 @@ export function CodeReviewPanel({
       {showFeedback && (
         <div className="mt-3 space-y-2">
           <textarea
-            className="w-full rounded border border-gray-300 p-2 text-sm"
+            className="w-full rounded border border-outline-variant bg-surface p-2 text-sm text-on-surface placeholder-on-surface-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             rows={3}
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
@@ -148,7 +147,7 @@ export function CodeReviewPanel({
           <button
             disabled={!feedback.trim() || busy}
             onClick={onReject}
-            className="rounded bg-amber-600 px-3 py-1.5 text-sm font-medium text-white disabled:bg-gray-300"
+            className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-on-primary disabled:opacity-50"
           >
             提交驳回
           </button>

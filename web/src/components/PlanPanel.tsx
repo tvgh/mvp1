@@ -23,7 +23,7 @@ export function PlanPanel({
   if (!task.planMode) {
     return (
       <Card title="Plan">
-        <p className="text-sm text-gray-500">该任务未开启 Plan 模式，已跳过 Plan 阶段。</p>
+        <p className="text-sm text-on-surface-variant">该任务未开启 Plan 模式，已跳过 Plan 阶段。</p>
       </Card>
     );
   }
@@ -61,7 +61,7 @@ export function PlanPanel({
       right={
         plans.length > 0 && (
           <select
-            className="rounded border border-gray-300 px-2 py-1 text-xs"
+            className="rounded border border-outline px-2 py-1 text-xs bg-surface text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
             value={selectedVersion ?? latestPlan?.version ?? ''}
             onChange={(e) => setSelectedVersion(Number(e.target.value))}
           >
@@ -78,17 +78,17 @@ export function PlanPanel({
       }
     >
       {!viewing && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-on-surface-variant">
           {task.status === 'planning' ? 'Plan 正在生成中…' : '尚未生成 Plan。'}
         </p>
       )}
       {viewing && (
         <>
-          <div className="markdown text-sm text-gray-800">
+          <div className="markdown text-sm text-on-surface">
             <ReactMarkdown>{viewing.content}</ReactMarkdown>
           </div>
           {viewing.feedback && (
-            <div className="mt-3 rounded border border-amber-200 bg-amber-50 p-2 text-xs text-amber-800">
+            <div className="mt-3 rounded border border-outline-variant bg-surface-container-high p-2 text-xs text-on-surface">
               上一轮反馈：{viewing.feedback}
             </div>
           )}
@@ -96,19 +96,19 @@ export function PlanPanel({
             <button
               disabled={!canAct || busy}
               onClick={onConfirm}
-              className="rounded bg-green-600 px-3 py-1.5 text-sm font-medium text-white disabled:bg-gray-300"
+              className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-on-primary disabled:opacity-50"
             >
               确认 Plan
             </button>
             <button
               disabled={!canAct || busy}
               onClick={() => setShowFeedback((s) => !s)}
-              className="rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="rounded border border-outline px-3 py-1.5 text-sm font-medium text-on-surface hover:bg-surface-bright disabled:opacity-50"
             >
               驳回并填写修改意见
             </button>
             {!canAct && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-on-surface-variant">
                 {viewing.status === 'confirmed' ? '已确认' : '当前状态不可操作'}
               </span>
             )}
@@ -116,7 +116,7 @@ export function PlanPanel({
           {showFeedback && (
             <div className="mt-3 space-y-2">
               <textarea
-                className="w-full rounded border border-gray-300 p-2 text-sm"
+                className="w-full rounded border border-outline-variant bg-surface p-2 text-sm text-on-surface placeholder-on-surface-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 rows={3}
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
@@ -125,7 +125,7 @@ export function PlanPanel({
               <button
                 disabled={!feedback.trim() || busy}
                 onClick={onReject}
-                className="rounded bg-amber-600 px-3 py-1.5 text-sm font-medium text-white disabled:bg-gray-300"
+                className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-on-primary disabled:opacity-50"
               >
                 提交驳回
               </button>

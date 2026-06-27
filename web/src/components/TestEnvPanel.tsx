@@ -53,11 +53,11 @@ export function TestEnvPanel({
   return (
     <Card title="AIWX 临时环境与测试">
       <div className="grid grid-cols-[120px_1fr] gap-2 text-sm">
-        <div className="text-gray-500">环境地址</div>
+        <div className="text-on-surface-variant">环境地址</div>
         <div className="font-mono">
           {env?.envUrl ? (
             <a
-              className="text-blue-600 hover:underline"
+              className="text-primary hover:underline"
               href={env.envUrl}
               target="_blank"
               rel="noreferrer"
@@ -68,18 +68,18 @@ export function TestEnvPanel({
             '—'
           )}
         </div>
-        <div className="text-gray-500">环境名称</div>
+        <div className="text-on-surface-variant">环境名称</div>
         <div className="font-mono">{env?.envName ?? '—'}</div>
-        <div className="text-gray-500">部署分支</div>
+        <div className="text-on-surface-variant">部署分支</div>
         <div className="font-mono">{env?.branchName ?? task.branchName ?? '—'}</div>
-        <div className="text-gray-500">Commit</div>
+        <div className="text-on-surface-variant">Commit</div>
         <div className="font-mono">{env?.commitId ?? task.baseCommit ?? '—'}</div>
-        <div className="text-gray-500">流水线状态</div>
+        <div className="text-on-surface-variant">流水线状态</div>
         <div>{pipelineStatus}</div>
       </div>
 
       {review?.testSuggestion && (
-        <div className="mt-3 rounded border border-blue-100 bg-blue-50 p-2 text-xs text-blue-800 whitespace-pre-line">
+        <div className="mt-3 rounded border border-outline-variant bg-surface-container-high p-2 text-xs text-on-surface whitespace-pre-line">
           <strong>测试建议：</strong>
           {'\n'}
           {review.testSuggestion}
@@ -90,19 +90,19 @@ export function TestEnvPanel({
         <button
           disabled={!canAct || busy}
           onClick={onPass}
-          className="rounded bg-green-600 px-3 py-1.5 text-sm font-medium text-white disabled:bg-gray-300"
+          className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-on-primary disabled:opacity-50"
         >
           测试通过 → 创建 MR
         </button>
         <button
           disabled={!canAct || busy}
           onClick={() => setShowFeedback((s) => !s)}
-          className="rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+          className="rounded border border-outline px-3 py-1.5 text-sm font-medium text-on-surface hover:bg-surface-bright disabled:opacity-50"
         >
           测试不通过
         </button>
         {!canAct && (
-          <span className="text-xs text-gray-500">
+          <span className="text-xs text-on-surface-variant">
             {task.status === 'completed'
               ? '任务已完成'
               : task.status === 'mr_pending_merge' || task.status === 'creating_mr'
@@ -114,7 +114,7 @@ export function TestEnvPanel({
       {showFeedback && (
         <div className="mt-3 space-y-2">
           <textarea
-            className="w-full rounded border border-gray-300 p-2 text-sm"
+            className="w-full rounded border border-outline-variant bg-surface p-2 text-sm text-on-surface placeholder-on-surface-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
             rows={3}
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
@@ -123,7 +123,7 @@ export function TestEnvPanel({
           <button
             disabled={!feedback.trim() || busy}
             onClick={onFail}
-            className="rounded bg-amber-600 px-3 py-1.5 text-sm font-medium text-white disabled:bg-gray-300"
+            className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-on-primary disabled:opacity-50"
           >
             提交反馈
           </button>

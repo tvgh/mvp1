@@ -26,25 +26,49 @@ const LABEL: Record<TaskStatus, string> = {
   cancelled: '已取消',
 };
 
-function colorOf(status: TaskStatus): string {
-  if (status === 'completed') return 'bg-green-100 text-green-700 border-green-300';
-  if (status === 'cancelled') return 'bg-gray-100 text-gray-600 border-gray-300';
-  if (status.startsWith('failed_')) return 'bg-red-100 text-red-700 border-red-300';
+function getBadgeConfig(status: TaskStatus) {
+  if (status === 'completed') {
+    return {
+      className: 'badge-completed border-green-200',
+      icon: <span className="material-symbols-outlined text-[14px]">check_circle</span>,
+    };
+  }
+  if (status === 'cancelled' || status === 'queued') {
+    return {
+      className: 'badge-queued border-slate-200',
+      icon: <span className="material-symbols-outlined text-[14px]">schedule</span>,
+    };
+  }
+  if (status.startsWith('failed_')) {
+    return {
+      className: 'badge-failed border-red-200',
+      icon: <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>,
+    };
+  }
   if (
     status === 'plan_pending_confirm' ||
     status === 'code_pending_review' ||
     status === 'testing_pending' ||
     status === 'mr_pending_merge'
-  )
-    return 'bg-amber-100 text-amber-700 border-amber-300';
-  return 'bg-blue-100 text-blue-700 border-blue-300';
+  ) {
+    return {
+      className: 'badge-testing border-purple-200',
+      icon: <span className="w-1.5 h-1.5 rounded-full bg-purple-500"></span>,
+    };
+  }
+  return {
+    className: 'badge-processing border-blue-200',
+    icon: <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>,
+  };
 }
 
 export function StatusBadge({ status }: { status: TaskStatus }) {
+  const config = getBadgeConfig(status);
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${colorOf(status)}`}
+      className={`px-2 py-1 rounded-full font-label-md text-label-md flex items-center gap-xs w-max border ${config.className}`}
     >
+      {config.icon}
       {LABEL[status] ?? status}
     </span>
   );

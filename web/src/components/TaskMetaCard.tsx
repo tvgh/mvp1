@@ -5,8 +5,8 @@ import { StatusBadge } from './StatusBadge';
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="grid grid-cols-[120px_1fr] gap-2 py-1.5 text-sm">
-      <div className="text-gray-500">{label}</div>
-      <div className="font-mono text-gray-800 break-all">{value ?? '—'}</div>
+      <div className="text-on-surface-variant">{label}</div>
+      <div className="font-mono text-on-surface break-all">{value ?? '—'}</div>
     </div>
   );
 }
@@ -21,13 +21,13 @@ export function TaskMetaCard({ task, app }: { task: Task; app?: AppInfo }) {
         </span>
       }
       right={
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-on-surface-variant">
           {task.requirementId} · {task.id}
         </span>
       }
     >
-      <p className="mb-3 whitespace-pre-line text-sm text-gray-700">{task.content}</p>
-      <div className="divide-y divide-gray-100">
+      <p className="mb-3 whitespace-pre-line text-sm text-on-surface">{task.content}</p>
+      <div className="divide-y divide-outline-variant">
         <Row label="项目" value={task.projectId} />
         <Row label="应用" value={app ? `${app.appName} (${app.appId})` : task.appId} />
         <Row label="Git 仓库" value={app?.gitUrl} />
@@ -40,7 +40,7 @@ export function TaskMetaCard({ task, app }: { task: Task; app?: AppInfo }) {
           label="MR 地址"
           value={
             task.mrUrl ? (
-              <a className="text-blue-600 hover:underline" href={task.mrUrl} target="_blank">
+              <a className="text-primary hover:underline" href={task.mrUrl} target="_blank">
                 {task.mrUrl}
               </a>
             ) : (
@@ -51,7 +51,7 @@ export function TaskMetaCard({ task, app }: { task: Task; app?: AppInfo }) {
         {task.failReason && (
           <Row
             label="失败原因"
-            value={<span className="text-red-600">{task.failReason}</span>}
+            value={<span className="text-error">{task.failReason}</span>}
           />
         )}
       </div>

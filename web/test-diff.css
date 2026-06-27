@@ -1,0 +1,63 @@
+/* Solarized Light Theme for Diff2Html */
+.d2h-wrapper {
+  background-color: #fdf6e3 !important;
+  color: #586e75 !important;
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
+  border: none !important;
+}
+
+.d2h-file-header {
+  background-color: #eee8d5 !important;
+  color: #586e75 !important;
+  border-bottom: 1px solid #dcd3b6 !important;
+}
+
+.d2h-file-list-wrapper {
+  display: none !important; /* Often hidden for clean look, but we'll leave it as is if they want it. Actually we'll just style it */
+}
+
+.d2h-code-linenumber {
+  background-color: #fdf6e3 !important;
+  color: #268bd2 !important; /* Blue line numbers */
+  border: none !important;
+}
+
+.d2h-code-line {
+  color: #586e75 !important;
+}
+
+/* Deletions */
+.d2h-del {
+  background-color: #fbe9e9 !important;
+}
+.d2h-code-line del {
+  background-color: #f6c6c6 !important;
+  text-decoration: none !important;
+  border-radius: 2px;
+}
+
+/* Additions */
+.d2h-ins {
+  background-color: #eaf5ea !important;
+}
+.d2h-code-line ins {
+  background-color: #c6e6c6 !important;
+  text-decoration: none !important;
+  border-radius: 2px;
+}
+
+/* Line prefix styling */
+.d2h-code-line-prefix {
+  color: #586e75 !important;
+  opacity: 0.7;
+}
+
+/* Table styling to remove borders */
+.d2h-files-diff {
+  border: none !important;
+}
+.d2h-file-diff {
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  border: 1px solid #dcd3b6 !important;
+}

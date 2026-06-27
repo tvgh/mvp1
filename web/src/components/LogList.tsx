@@ -2,9 +2,9 @@ import type { LogEntry } from '../api/types';
 import { Card } from './Card';
 
 function color(status: LogEntry['status']) {
-  if (status === 'fail') return 'text-red-600';
-  if (status === 'success') return 'text-green-600';
-  return 'text-gray-600';
+  if (status === 'fail') return 'text-error';
+  if (status === 'success') return 'text-green-500';
+  return 'text-on-surface-variant';
 }
 
 function actor(a: LogEntry['actor']) {
@@ -27,17 +27,17 @@ export function LogList({ logs }: { logs: LogEntry[] }) {
           .map((l, i) => (
             <li
               key={`${l.createdAt}-${i}`}
-              className="grid grid-cols-[150px_100px_90px_1fr] gap-2 border-b border-gray-50 py-1"
+              className="grid grid-cols-[150px_100px_90px_1fr] gap-2 border-b border-outline-variant py-1"
             >
-              <span className="font-mono text-gray-400">
+              <span className="font-mono text-on-surface-variant">
                 {new Date(l.createdAt).toLocaleTimeString()}
               </span>
-              <span className="text-gray-500">{actor(l.actor)}</span>
+              <span className="text-on-surface-variant">{actor(l.actor)}</span>
               <span className={`font-mono ${color(l.status)}`}>{l.action}</span>
-              <span className="text-gray-700">{l.message}</span>
+              <span className="text-on-surface">{l.message}</span>
             </li>
           ))}
-        {logs.length === 0 && <li className="text-gray-400">暂无日志</li>}
+        {logs.length === 0 && <li className="text-on-surface-variant">暂无日志</li>}
       </ol>
     </Card>
   );

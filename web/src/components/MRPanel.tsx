@@ -15,11 +15,11 @@ export function MRPanel({ task }: { task: Task }) {
   return (
     <Card title="Merge Request">
       <div className="grid grid-cols-[120px_1fr] gap-2 text-sm">
-        <div className="text-gray-500">MR 地址</div>
+        <div className="text-on-surface-variant">MR 地址</div>
         <div className="font-mono">
           {task.mrUrl ? (
             <a
-              className="text-blue-600 hover:underline"
+              className="text-primary hover:underline"
               href={task.mrUrl}
               target="_blank"
               rel="noreferrer"
@@ -30,20 +30,20 @@ export function MRPanel({ task }: { task: Task }) {
             '—'
           )}
         </div>
-        <div className="text-gray-500">源分支</div>
+        <div className="text-on-surface-variant">源分支</div>
         <div className="font-mono">{task.branchName ?? '—'}</div>
-        <div className="text-gray-500">目标分支</div>
+        <div className="text-on-surface-variant">目标分支</div>
         <div className="font-mono">{task.baseBranch ?? '—'}</div>
-        <div className="text-gray-500">阶段</div>
+        <div className="text-on-surface-variant">阶段</div>
         <div>{phase}</div>
       </div>
       {pending && (
-        <p className="mt-3 text-xs text-amber-700">
+        <p className="mt-3 text-xs text-on-surface-variant">
           模拟器会在数秒后自动模拟 GitLab MR 合并 webhook。
         </p>
       )}
       {merged && (
-        <p className="mt-3 text-xs text-green-700">MR 已合并，环境销毁后任务进入已完成状态。</p>
+        <p className="mt-3 text-xs text-on-surface-variant">MR 已合并，环境销毁后任务进入已完成状态。</p>
       )}
     </Card>
   );
