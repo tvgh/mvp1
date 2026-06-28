@@ -65,7 +65,7 @@ tasksRouter.post('/tasks', (req, res) => {
     content: body.content ?? '',
     appId: body.appId!,
     planMode: body.planMode ?? true,
-    status: 'queued',
+    status: body.status ?? 'queued',
     createdAt: nowISO(),
     updatedAt: nowISO(),
   };
@@ -75,7 +75,7 @@ tasksRouter.post('/tasks', (req, res) => {
     action: 'task:created',
     actor: 'user',
     status: 'info',
-    message: `任务 ${id} 已加入队列`,
+    message: body.status === 'pending_start' ? `任务 ${id} 已导入，等待开始` : `任务 ${id} 已加入队列`,
   });
   res.json({ task });
 });

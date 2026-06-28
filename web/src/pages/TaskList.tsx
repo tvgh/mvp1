@@ -11,6 +11,7 @@ export function TaskList() {
   const { tasks, refresh } = useTasks();
   const [apps, setApps] = useState<AppInfo[]>([]);
   const [showCreate, setShowCreate] = useState(false);
+  const [showImport, setShowImport] = useState(false);
   const [startingTask, setStartingTask] = useState<any>(null);
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
@@ -18,6 +19,12 @@ export function TaskList() {
 
   useEffect(() => {
     api.listApps().then((r) => setApps(r.apps));
+  }, []);
+
+  useEffect(() => {
+    const handleOpenImport = () => setShowImport(true);
+    window.addEventListener('open-import-task', handleOpenImport);
+    return () => window.removeEventListener('open-import-task', handleOpenImport);
   }, []);
 
   const allProjects = Array.from(new Set(tasks.map((t) => t.projectId))).filter(Boolean);
@@ -52,6 +59,12 @@ export function TaskList() {
           </p>
         </div>
         <div className="flex items-center gap-sm bg-surface-container-lowest border border-outline-variant rounded-lg p-xs">
+          <button
+            onClick={() => setShowImport(true)}
+            className="px-md py-[6px] rounded border border-outline bg-transparent text-on-surface font-body-sm text-body-sm transition-colors hover:bg-surface-container-highest"
+          >
+            导入任务
+          </button>
           <button
             onClick={() => setShowCreate(true)}
             className="px-md py-[6px] rounded bg-primary-container text-white font-body-sm text-body-sm transition-colors hover:bg-primary"
@@ -210,6 +223,16 @@ export function TaskList() {
           onClose={() => setStartingTask(null)}
           onStarted={async () => {
             setStartingTask(null);
+            await refresh();
+          }}
+        />
+      )}
+      {showImport && (
+        <ImportTaskDialog
+          apps={apps}
+          onClose={() => setShowImport(false)}
+          onImported={async () => {
+            setShowImport(false);
             await refresh();
           }}
         />
@@ -523,6 +546,158 @@ function StartTaskDialog({
             className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-on-primary disabled:opacity-50"
           >
             加入队列
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ImportTaskDialog({
+  apps,
+  onClose,
+  onImported,
+}: {
+  apps: AppInfo[];
+  onClose: () => void;
+  onImported: () => void;
+}) {
+  const [appId, setAppId] = useState(apps[0]?.appId ?? 'app-001');
+  const [source, setSource] = useState('gitlab');
+  const [issues, setIssues] = useState<any[]>([]);
+  const [selectedIssues, setSelectedIssues] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (source === 'gitlab' && appId) {
+      setLoading(true);
+      setErr(null);
+      api.getGitlabIssues(appId)
+        .then((res) => {
+          setIssues(res.issues);
+          setSelectedIssues(new Set());
+        })
+        .catch((e) => setErr(e.message))
+        .finally(() => setLoading(false));
+    } else {
+      setIssues([]);
+    }
+  }, [source, appId]);
+
+  const toggleIssue = (id: string) => {
+    const next = new Set(selectedIssues);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelectedIssues(next);
+  };
+
+  const submit = async () => {
+    setImporting(true);
+    setErr(null);
+    try {
+      const selected = issues.filter(i => selectedIssues.has(i.id));
+      for (const issue of selected) {
+        await api.createTask({
+          projectId: 'project-001',
+          requirementId: `REQ-${issue.iid}`,
+          title: issue.title,
+          content: issue.description,
+          appId,
+          planMode: true,
+          status: 'pending_start'
+        });
+      }
+      onImported();
+    } catch (e: any) {
+      setErr(e.message);
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/30"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-2xl rounded-lg border border-outline-variant bg-surface-container p-5 shadow-xl text-on-surface flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="mb-3 text-base font-semibold shrink-0">导入任务</h2>
+        <div className="space-y-4 text-sm overflow-auto pr-2 flex-1 flex flex-col">
+          <div className="grid grid-cols-2 gap-4 shrink-0">
+            <Field label="导入目标项目 (App)">
+              <select
+                className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
+                value={appId}
+                onChange={(e) => setAppId(e.target.value)}
+              >
+                {apps.map((a) => (
+                  <option key={a.appId} value={a.appId}>
+                    {a.appName} ({a.appId})
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="导入源头">
+              <select
+                className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+              >
+                <option value="gitlab">GitLab Issues</option>
+              </select>
+            </Field>
+          </div>
+          
+          <div className="flex-1 flex flex-col min-h-0 border border-outline-variant rounded bg-surface">
+            <div className="p-2 border-b border-outline-variant bg-surface-container-lowest font-medium text-xs text-on-surface-variant flex justify-between">
+              <span>{source === 'gitlab' ? 'GitLab Issues' : 'Issues'}</span>
+              <span>已选 {selectedIssues.size} 项</span>
+            </div>
+            <div className="overflow-auto p-2 flex-1">
+              {loading ? (
+                <div className="text-center py-4 text-on-surface-variant">加载中...</div>
+              ) : issues.length === 0 ? (
+                <div className="text-center py-4 text-on-surface-variant">暂无数据</div>
+              ) : (
+                <div className="space-y-2">
+                  {issues.map(issue => (
+                    <label key={issue.id} className="flex items-start gap-3 p-2 rounded hover:bg-surface-container-high cursor-pointer transition-colors border border-transparent hover:border-outline-variant">
+                      <input 
+                        type="checkbox" 
+                        className="mt-1"
+                        checked={selectedIssues.has(issue.id)}
+                        onChange={() => toggleIssue(issue.id)}
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-on-surface truncate">#{issue.iid} {issue.title}</div>
+                        <div className="text-xs text-on-surface-variant line-clamp-2 mt-1">{issue.description}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        {err && <p className="mt-3 text-xs text-error shrink-0">{err}</p>}
+        <div className="mt-4 flex justify-end gap-2 shrink-0">
+          <button
+            onClick={onClose}
+            className="rounded border border-outline px-3 py-1.5 text-sm text-on-surface hover:bg-surface-bright"
+          >
+            取消
+          </button>
+          <button
+            disabled={importing || selectedIssues.size === 0}
+            onClick={submit}
+            className="rounded bg-primary px-3 py-1.5 text-sm font-medium text-on-primary disabled:opacity-50"
+          >
+            {importing ? '导入中...' : `导入 (${selectedIssues.size})`}
           </button>
         </div>
       </div>

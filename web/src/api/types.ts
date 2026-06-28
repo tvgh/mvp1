@@ -103,3 +103,10 @@ export interface TaskDetail {
   review?: ReviewInfo;
   env?: EnvRecord;
 }
+
+export interface GitlabIssue {
+  id: string;
+  iid: number;
+  title: string;
+  description: string;
+}

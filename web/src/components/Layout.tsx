@@ -31,7 +31,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <button
           className="w-full bg-primary-container text-white hover:bg-primary transition-colors duration-200 rounded-lg py-sm px-md mb-md font-body-md text-body-md font-medium flex justify-center items-center gap-xs"
           onClick={() => {
-            /* Handled globally or contextually later */
+            window.dispatchEvent(new CustomEvent('open-import-task'));
           }}
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
