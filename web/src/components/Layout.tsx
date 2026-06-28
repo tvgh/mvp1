@@ -15,15 +15,15 @@ export function Layout({ children }: { children: ReactNode }) {
       {/* SideNavBar */}
       <aside className="w-[240px] h-screen sticky left-0 top-0 bg-surface border-r border-outline-variant flex-col p-md hidden md:flex shrink-0">
         {/* Header */}
-        <div className="flex items-center gap-sm mb-lg">
+        <div className="flex items-center gap-3 mb-lg">
           <img
-            className="w-8 h-8 rounded-full object-cover"
+            className="w-10 h-10 rounded-full object-cover shadow-sm"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5iSigBAEepc5JiHoJQCZOA3htZTNe5FDVS3GJNVZFsCCipbYWg3tj71c5eD18HuAzIfhE3B6jGtbl8kwWqzHVMRwpaXAY1MkC2HJQRo_8S6FrFGdb6vKepgR4FqzLr04SzQgN8VLK9WnRBxKCb719CWXmTcwBxWscAKelB0nJZZQdEXwGsV0lmmu4xxN4v1mzC05Orje1H0UQIBxZ3BBXjvu7-rrEAIsWCyVvLDkn9dDY5G5-wsbuKcSy3ptGWQj3-Mo8Fj5NikQ"
             alt="AIWX Avatar"
           />
-          <div>
-            <h1 className="font-display-lg text-headline-lg font-bold text-primary">AIWX</h1>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">v1.0.4-stable</p>
+          <div className="flex flex-col justify-center">
+            <h1 className="text-2xl font-bold text-primary leading-none mb-1 tracking-wider">万象</h1>
+            <p className="text-xs text-on-surface-variant leading-none tracking-widest">智能交付系统</p>
           </div>
         </div>
 
@@ -53,7 +53,7 @@ export function Layout({ children }: { children: ReactNode }) {
             >
               assignment_turned_in
             </span>
-            编码任务
+            AI编码任务
           </Link>
           <a
             href="#"
@@ -104,7 +104,7 @@ export function Layout({ children }: { children: ReactNode }) {
           {/* Mobile Brand (Hidden on Desktop) */}
           <div className="md:hidden flex items-center gap-sm">
             <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">
-              AIWX
+              万象
             </h1>
           </div>
           {/* Search Bar on Left */}
