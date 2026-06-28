@@ -93,8 +93,8 @@ tasksRouter.post('/tasks/:id/start', (req, res) => {
   const task = store.tasks.get(req.params.id);
   if (!task) return res.status(404).json({ error: 'not found' });
   
-  if (task.status !== 'pending_start') {
-    return res.status(400).json({ error: '只能加入处于待开始状态的任务' });
+  if (!['pending_start', 'cancelled'].includes(task.status)) {
+    return res.status(400).json({ error: '只能重新运行处于待开始或已取消状态的任务' });
   }
 
   const body = req.body ?? {};

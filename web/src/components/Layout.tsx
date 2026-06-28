@@ -22,8 +22,8 @@ export function Layout({ children }: { children: ReactNode }) {
             alt="AIWX Avatar"
           />
           <div className="flex flex-col justify-center">
-            <h1 className="text-2xl font-bold text-primary leading-none mb-1 tracking-wider">万象</h1>
-            <p className="text-xs text-on-surface-variant leading-none tracking-widest">智能交付系统</p>
+            <h1 className="text-lg font-bold text-primary leading-none mb-1 tracking-wide">万象智能交付</h1>
+            <p className="text-xs text-on-surface-variant leading-none tracking-wider uppercase">featflow</p>
           </div>
         </div>
 
@@ -35,7 +35,7 @@ export function Layout({ children }: { children: ReactNode }) {
           }}
         >
           <span className="material-symbols-outlined text-[18px]">add</span>
-          新建任务
+          导入任务
         </button>
 
         {/* Navigation Tabs */}
@@ -104,21 +104,11 @@ export function Layout({ children }: { children: ReactNode }) {
           {/* Mobile Brand (Hidden on Desktop) */}
           <div className="md:hidden flex items-center gap-sm">
             <h1 className="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">
-              万象
+              万象智能交付
             </h1>
           </div>
-          {/* Search Bar on Left */}
-          <div className="hidden md:flex items-center w-64 relative">
-            <span className="material-symbols-outlined absolute left-sm text-on-surface-variant text-[18px]">
-              search
-            </span>
-            <input
-              className="input-light w-full pl-8 pr-sm py-[6px] rounded border font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-0 placeholder-on-surface-variant"
-              placeholder="搜索任务、ID..."
-              type="text"
-            />
-          </div>
-          <div className="flex items-center gap-md">
+
+          <div className="flex items-center gap-md ml-auto">
             {/* Navigation Links */}
             <span className="font-label-md text-label-md uppercase text-on-surface-variant hidden md:inline-block">
               状态：8/12 环境运行中

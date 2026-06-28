@@ -24,7 +24,7 @@ const ALLOWED: Record<TaskStatus, TaskStatus[]> = {
   failed_pipeline: ['deploying', 'cancelled'],
   failed_mr: ['creating_mr', 'cancelled'],
   failed_destroy_env: ['destroying_env', 'cancelled'],
-  cancelled: [],
+  cancelled: ['queued'],
 };
 
 export const HAPPY_PATH: TaskStatus[] = [

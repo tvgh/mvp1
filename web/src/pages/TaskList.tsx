@@ -14,6 +14,7 @@ export function TaskList() {
   const [startingTask, setStartingTask] = useState<any>(null);
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     api.listApps().then((r) => setApps(r.apps));
@@ -25,7 +26,11 @@ export function TaskList() {
   const filteredTasks = tasks.filter((t) => {
     const matchProject = selectedProjects.length === 0 || selectedProjects.includes(t.projectId);
     const matchStatus = selectedStatuses.length === 0 || selectedStatuses.includes(t.status);
-    return matchProject && matchStatus;
+    const matchSearch = searchQuery.trim() === '' || 
+      t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      t.requirementId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.id.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchProject && matchStatus && matchSearch;
   });
 
   const appName = (id: string) => apps.find((a) => a.appId === id)?.appName ?? id;
@@ -93,10 +98,22 @@ export function TaskList() {
         </div>
       </div>
 
-      {/* Filters */}
+      {/* Filters and Search */}
       <div className="flex items-center gap-3 mb-sm">
-         <MultiSelect label="项目过滤" options={allProjects} value={selectedProjects} onChange={setSelectedProjects} />
-         <MultiSelect label="状态过滤" options={allStatuses} value={selectedStatuses} onChange={setSelectedStatuses} getOptionLabel={(opt) => (STATUS_LABEL as any)[opt] || opt} />
+        <div className="hidden md:flex items-center w-64 relative">
+          <span className="material-symbols-outlined absolute left-sm text-on-surface-variant text-[18px]">
+            search
+          </span>
+          <input
+            className="input-light w-full pl-8 pr-sm py-[6px] rounded border font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-0 placeholder-on-surface-variant"
+            placeholder="搜索任务、ID..."
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <MultiSelect label="项目过滤" options={allProjects} value={selectedProjects} onChange={setSelectedProjects} />
+        <MultiSelect label="状态过滤" options={allStatuses} value={selectedStatuses} onChange={setSelectedStatuses} getOptionLabel={(opt) => (STATUS_LABEL as any)[opt] || opt} />
       </div>
 
       {/* Tasks List Card */}
@@ -120,7 +137,7 @@ export function TaskList() {
             >
               <div className="col-span-2 font-label-md text-label-md text-primary-container flex items-center gap-1">
                 <span className="truncate">{t.requirementId}</span>
-                {t.status === 'pending_start' && (
+                {['pending_start', 'cancelled'].includes(t.status) && (
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
