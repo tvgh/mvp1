@@ -1,8 +1,8 @@
+@import 'diff2html/bundles/css/diff2html.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import 'diff2html/bundles/css/diff2html.min.css';
 
 :root {
   color-scheme: light;
