@@ -30,8 +30,20 @@ function pickFailure(): boolean {
 }
 
 function step(task: Task) {
-  const app = store.apps.get(task.appId);
-  if (!app) return;
+  let app = task.appId ? store.apps.get(task.appId) : undefined;
+  if (!app) {
+    const projectApps = Array.from(store.apps.values()).filter((a) => a.projectId === task.projectId);
+    if (projectApps.length > 0) {
+      app = projectApps[0];
+      task.appId = app.appId;
+    } else {
+      if (task.status === 'queued') {
+        task.failReason = '未找到目标应用';
+        transition(task, 'failed_baseline', task.failReason);
+      }
+      return;
+    }
+  }
 
   switch (task.status) {
     case 'queued': {
