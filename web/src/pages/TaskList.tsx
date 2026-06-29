@@ -627,15 +627,6 @@ function ImportTaskDialog({
 }) {
   const projects = Array.from(new Map(apps.map((a) => [a.projectId, a.projectName])).entries());
   const [projectId, setProjectId] = useState(projects[0]?.[0] ?? 'project-001');
-  const projectApps = apps.filter((a) => a.projectId === projectId);
-  const [appId, setAppId] = useState('');
-
-  useEffect(() => {
-    const validApps = apps.filter((a) => a.projectId === projectId);
-    if (appId !== '' && !validApps.some((a) => a.appId === appId)) {
-      setAppId('');
-    }
-  }, [projectId, apps, appId]);
   const [source, setSource] = useState('gitlab');
   const [issues, setIssues] = useState<any[]>([]);
   const [selectedIssues, setSelectedIssues] = useState<Set<string>>(new Set());
@@ -644,10 +635,10 @@ function ImportTaskDialog({
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    if (source === 'gitlab' && appId) {
+    if (source === 'gitlab' && projectId) {
       setLoading(true);
       setErr(null);
-      api.getGitlabIssues(appId)
+      api.getGitlabIssues(projectId)
         .then((res) => {
           setIssues(res.issues);
           setSelectedIssues(new Set());
@@ -657,7 +648,7 @@ function ImportTaskDialog({
     } else {
       setIssues([]);
     }
-  }, [source, appId]);
+  }, [source, projectId]);
 
   const toggleIssue = (id: string) => {
     const next = new Set(selectedIssues);
@@ -677,7 +668,7 @@ function ImportTaskDialog({
           requirementId: `REQ-${issue.iid}`,
           title: issue.title,
           content: issue.description,
-          appId,
+          appId: '',
           planMode: true,
           status: 'pending_start'
         });
@@ -725,31 +716,6 @@ function ImportTaskDialog({
               </select>
             </Field>
           </div>
-          <Field label="导入目标应用">
-            <select
-              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-              value={appId}
-              onChange={(e) => setAppId(e.target.value)}
-            >
-              <option value="">&lt;自动选择&gt;</option>
-              {projectApps.map((a) => (
-                <option key={a.appId} value={a.appId}>
-                  {a.appName} ({a.appId})
-                </option>
-              ))}
-            </select>
-            {projectApps.find(a => a.appId === appId) && (
-              <div className="mt-1.5 p-2 bg-surface-container-lowest border border-outline-variant rounded text-xs">
-                <div className="text-on-surface-variant mb-1">
-                  {projectApps.find(a => a.appId === appId)?.appDescription}
-                </div>
-                <div className="text-on-surface truncate font-mono text-[10px]">
-                  {projectApps.find(a => a.appId === appId)?.gitUrl}
-                </div>
-              </div>
-            )}
-          </Field>
-          
           <div className="flex-1 flex flex-col min-h-0 border border-outline-variant rounded bg-surface">
             <div className="p-2 border-b border-outline-variant bg-surface-container-lowest font-medium text-xs text-on-surface-variant flex justify-between">
               <span>{source === 'gitlab' ? 'GitLab Issues' : 'Issues'}</span>

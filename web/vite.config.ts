@@ -7,6 +7,7 @@ export default defineConfig({
     extensions: ['.tsx', '.ts', '.mjs', '.js', '.jsx', '.json'],
   },
   server: {
+    host: true,
     port: 5173,
     proxy: {
       '/api': 'http://localhost:4000',
