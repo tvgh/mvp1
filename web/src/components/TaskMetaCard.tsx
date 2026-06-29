@@ -80,7 +80,7 @@ export function TaskMetaCard({
   const [requirementId, setRequirementId] = useState(task.requirementId);
   const [title, setTitle] = useState(task.title);
   const [content, setContent] = useState(task.content);
-  const [appId, setAppId] = useState(task.appId);
+  const [appId, setAppId] = useState(task.appId || '');
   const [planMode, setPlanMode] = useState(task.planMode);
   const [baseBranch, setBaseBranch] = useState(task.baseBranch || '');
   const [busy, setBusy] = useState(false);
@@ -90,12 +90,25 @@ export function TaskMetaCard({
     api.listApps().then((r) => setApps(r.apps));
   }, []);
 
+  const projects = Array.from(new Map(apps.map((a) => [a.projectId, a.projectName])).entries());
+  const projectApps = apps.filter((a) => a.projectId === projectId);
+
+  const selectedApp = apps.find((a) => a.appId === appId) || app;
+
+  useEffect(() => {
+    const validApps = apps.filter((a) => a.projectId === projectId);
+    if (appId !== '' && !validApps.some((a) => a.appId === appId)) {
+      setAppId('');
+      setBaseBranch('');
+    }
+  }, [projectId, apps, appId]);
+
   useEffect(() => {
     setProjectId(task.projectId);
     setRequirementId(task.requirementId);
     setTitle(task.title);
     setContent(task.content);
-    setAppId(task.appId);
+    setAppId(task.appId || '');
     setPlanMode(task.planMode);
     setBaseBranch(task.baseBranch || '');
     setErr(null);
@@ -141,13 +154,27 @@ export function TaskMetaCard({
       }
     >
       <div className="space-y-3">
-        <Field label="项目 ID">
-          <input
-            className={inputClass}
-            value={projectId}
-            disabled={!editable}
-            onChange={(e) => setProjectId(e.target.value)}
-          />
+        <Field label="所属项目">
+          {editable ? (
+            <select
+              className={inputClass}
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+            >
+              {projects.length === 0 && <option value={projectId}>{projectId}</option>}
+              {projects.map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name} ({id})
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              className={inputClass}
+              value={apps.find(a => a.projectId === projectId)?.projectName || projectId}
+              disabled
+            />
+          )}
         </Field>
         <Field label="需求 ID">
           <input
@@ -174,30 +201,6 @@ export function TaskMetaCard({
             onChange={(e) => setContent(e.target.value)}
           />
         </Field>
-        <Field label="应用">
-          <select
-            className={inputClass}
-            value={appId}
-            disabled={!editable}
-            onChange={(e) => setAppId(e.target.value)}
-          >
-            {apps.length === 0 && <option value={appId}>{appId}</option>}
-            {apps.map((a) => (
-              <option key={a.appId} value={a.appId}>
-                {a.appName} ({a.appId})
-              </option>
-            ))}
-          </select>
-        </Field>
-        <Field label="目标分支 (选填)">
-          <input
-            placeholder="默认使用应用配置的主分支"
-            className={inputClass}
-            value={baseBranch}
-            disabled={!editable}
-            onChange={(e) => setBaseBranch(e.target.value)}
-          />
-        </Field>
         <label className="flex items-center gap-2 text-sm">
           <input
             type="checkbox"
@@ -207,11 +210,47 @@ export function TaskMetaCard({
           />
           <span>开启 Plan 模式</span>
         </label>
+        <Field label="目标应用">
+          <select
+            className={inputClass}
+            value={appId}
+            disabled={!editable}
+            onChange={(e) => {
+              const newAppId = e.target.value;
+              setAppId(newAppId);
+              const newApp = apps.find(a => a.appId === newAppId);
+              if (newApp) setBaseBranch(newApp.defaultBranch);
+            }}
+          >
+            <option value="">&lt;自动选择&gt;</option>
+            {projectApps.map((a) => (
+              <option key={a.appId} value={a.appId}>
+                {a.appName} ({a.appId})
+              </option>
+            ))}
+          </select>
+          {selectedApp?.appDescription && (
+            <div className="mt-1 text-xs text-on-surface-variant">
+              {selectedApp.appDescription}
+            </div>
+          )}
+        </Field>
+        {appId && (
+          <Field label="目标分支">
+            <input
+              placeholder="默认使用应用配置的主分支"
+              className={inputClass}
+              value={baseBranch}
+              disabled={!editable}
+              onChange={(e) => setBaseBranch(e.target.value)}
+            />
+          </Field>
+        )}
       </div>
 
       <div className="mt-4 border-t border-outline-variant pt-3">
         <div className="divide-y divide-outline-variant">
-          <Row label="Git 仓库" value={app?.gitUrl} />
+          {appId && <Row label="Git 仓库" value={selectedApp?.gitUrl} />}
           <Row label="baseCommit" value={task.baseCommit} />
           <Row label="AI 分支" value={task.branchName} />
           <Row label="沙箱 ID" value={task.sandboxId} />

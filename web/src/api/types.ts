@@ -30,7 +30,7 @@ export interface Task {
   requirementId: string;
   title: string;
   content: string;
-  appId: string;
+  appId?: string;
   planMode: boolean;
   status: TaskStatus;
   branchName?: string;
@@ -45,6 +45,8 @@ export interface Task {
 }
 
 export interface AppInfo {
+  projectId: string;
+  projectName: string;
   appId: string;
   appName: string;
   appDescription?: string;

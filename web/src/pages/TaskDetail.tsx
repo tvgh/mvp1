@@ -22,7 +22,7 @@ export function TaskDetail() {
 
   if (error) {
     return (
-      <div className="mx-auto max-w-7xl px-6 py-6">
+      <div className="mx-auto max-w-7xl">
         <Breadcrumb items={breadcrumbItems} />
         <p className="mt-4 text-error">加载失败：{error}</p>
         <Link to="/" className="mt-2 inline-block text-sm text-primary hover:underline">
@@ -34,7 +34,7 @@ export function TaskDetail() {
 
   if (!detail) {
     return (
-      <div className="mx-auto max-w-7xl px-6 py-6 text-sm text-on-surface-variant">
+      <div className="mx-auto max-w-7xl text-sm text-on-surface-variant">
         <Breadcrumb items={breadcrumbItems} />
         <p className="mt-4">加载中…</p>
       </div>
@@ -44,8 +44,8 @@ export function TaskDetail() {
   const { task, app, latestPlan, plans, review, env } = detail;
 
   return (
-    <div className="mx-auto max-w-7xl px-6 py-6">
-      <header className="mb-4 flex items-center justify-between">
+    <div className="mx-auto max-w-7xl">
+      <header className="sticky -top-margin-mobile md:-top-margin-desktop z-10 bg-background/90 backdrop-blur-md flex items-center justify-between border-b border-outline-variant -mx-margin-mobile md:-mx-margin-desktop px-margin-mobile md:px-margin-desktop pt-margin-mobile md:pt-margin-desktop pb-4 mb-4">
         <Breadcrumb items={breadcrumbItems} />
         <span className="text-xs text-on-surface-variant">每秒刷新一次</span>
       </header>

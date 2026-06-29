@@ -133,8 +133,8 @@ export function Layout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Page Canvas */}
-        <div className="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop bg-background">
-          <div className="max-w-[1400px] mx-auto space-y-lg">{children}</div>
+        <div className="flex-1 overflow-y-auto bg-background">
+          <div className="max-w-[1400px] mx-auto space-y-lg p-margin-mobile md:p-margin-desktop">{children}</div>
         </div>
       </main>
     </div>

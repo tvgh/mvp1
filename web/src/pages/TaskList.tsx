@@ -250,13 +250,23 @@ function CreateTaskDialog({
   onClose: () => void;
   onCreated: () => void;
 }) {
-  const [projectId, setProjectId] = useState('project-001');
+  const projects = Array.from(new Map(apps.map((a) => [a.projectId, a.projectName])).entries());
+  const [projectId, setProjectId] = useState(projects[0]?.[0] ?? 'project-001');
+  const projectApps = apps.filter((a) => a.projectId === projectId);
+  
   const [requirementId, setRequirementId] = useState(
     `REQ-${Math.floor(Math.random() * 90000 + 10000)}`,
   );
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [appId, setAppId] = useState(apps[0]?.appId ?? 'app-001');
+  const [appId, setAppId] = useState('');
+
+  useEffect(() => {
+    const validApps = apps.filter((a) => a.projectId === projectId);
+    if (appId !== '' && !validApps.some((a) => a.appId === appId)) {
+      setAppId('');
+    }
+  }, [projectId, apps, appId]);
   const [planMode, setPlanMode] = useState(true);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -285,12 +295,18 @@ function CreateTaskDialog({
       >
         <h2 className="mb-3 text-base font-semibold">加入任务队列</h2>
         <div className="space-y-3 text-sm">
-          <Field label="项目 ID">
-            <input
+          <Field label="所属项目">
+            <select
               className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
-            />
+            >
+              {projects.map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name} ({id})
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="需求 ID">
             <input
@@ -314,20 +330,7 @@ function CreateTaskDialog({
               onChange={(e) => setContent(e.target.value)}
             />
           </Field>
-          <Field label="应用">
-            <select
-              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-              value={appId}
-              onChange={(e) => setAppId(e.target.value)}
-            >
-              {apps.map((a) => (
-                <option key={a.appId} value={a.appId}>
-                  {a.appName} ({a.appId})
-                </option>
-              ))}
-            </select>
-          </Field>
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 mt-2">
             <input
               type="checkbox"
               checked={planMode}
@@ -335,6 +338,30 @@ function CreateTaskDialog({
             />
             <span>开启 Plan 模式</span>
           </label>
+          <Field label="目标应用">
+            <select
+              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
+              value={appId}
+              onChange={(e) => setAppId(e.target.value)}
+            >
+              <option value="">&lt;自动选择&gt;</option>
+              {projectApps.map((a) => (
+                <option key={a.appId} value={a.appId}>
+                  {a.appName} ({a.appId})
+                </option>
+              ))}
+            </select>
+            {projectApps.find(a => a.appId === appId) && (
+              <div className="mt-1.5 p-2 bg-surface-container-lowest border border-outline-variant rounded text-xs">
+                <div className="text-on-surface-variant mb-1">
+                  {projectApps.find(a => a.appId === appId)?.appDescription}
+                </div>
+                <div className="text-on-surface truncate font-mono text-[10px]">
+                  {projectApps.find(a => a.appId === appId)?.gitUrl}
+                </div>
+              </div>
+            )}
+          </Field>
         </div>
         {err && <p className="mt-2 text-xs text-error">{err}</p>}
         <div className="mt-4 flex justify-end gap-2">
@@ -431,11 +458,23 @@ function StartTaskDialog({
   onClose: () => void;
   onStarted: () => void;
 }) {
+  const projects = Array.from(new Map(apps.map((a) => [a.projectId, a.projectName])).entries());
   const [projectId, setProjectId] = useState(task.projectId);
+  const projectApps = apps.filter((a) => a.projectId === projectId);
+
   const [requirementId, setRequirementId] = useState(task.requirementId);
   const [title, setTitle] = useState(task.title);
   const [content, setContent] = useState(task.content);
-  const [appId, setAppId] = useState(task.appId);
+  const [appId, setAppId] = useState(task.appId || '');
+
+  useEffect(() => {
+    const validApps = apps.filter((a) => a.projectId === projectId);
+    if (appId !== '' && !validApps.some((a) => a.appId === appId)) {
+      setAppId('');
+      setBaseBranch('');
+    }
+  }, [projectId, apps, appId]);
+
   const [planMode, setPlanMode] = useState(task.planMode);
   const [baseBranch, setBaseBranch] = useState(task.baseBranch || '');
   const [busy, setBusy] = useState(false);
@@ -473,12 +512,18 @@ function StartTaskDialog({
       >
         <h2 className="mb-3 text-base font-semibold shrink-0">确认并加入队列</h2>
         <div className="space-y-3 text-sm overflow-auto pr-2 flex-1">
-          <Field label="项目 ID">
-            <input
+          <Field label="所属项目">
+            <select
               className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
               value={projectId}
               onChange={(e) => setProjectId(e.target.value)}
-            />
+            >
+              {projects.map(([id, name]) => (
+                <option key={id} value={id}>
+                  {name} ({id})
+                </option>
+              ))}
+            </select>
           </Field>
           <Field label="需求 ID">
             <input
@@ -502,27 +547,6 @@ function StartTaskDialog({
               onChange={(e) => setContent(e.target.value)}
             />
           </Field>
-          <Field label="应用">
-            <select
-              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-              value={appId}
-              onChange={(e) => setAppId(e.target.value)}
-            >
-              {apps.map((a) => (
-                <option key={a.appId} value={a.appId}>
-                  {a.appName} ({a.appId})
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="目标分支 (选填)">
-            <input
-              placeholder="默认使用应用配置的主分支"
-              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-              value={baseBranch}
-              onChange={(e) => setBaseBranch(e.target.value)}
-            />
-          </Field>
           <label className="flex items-center gap-2 mt-2">
             <input
               type="checkbox"
@@ -531,6 +555,45 @@ function StartTaskDialog({
             />
             <span>开启 Plan 模式</span>
           </label>
+          <Field label="目标应用">
+            <select
+              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
+              value={appId}
+              onChange={(e) => {
+                const newAppId = e.target.value;
+                setAppId(newAppId);
+                const newApp = apps.find(a => a.appId === newAppId);
+                if (newApp) setBaseBranch(newApp.defaultBranch);
+              }}
+            >
+              <option value="">&lt;自动选择&gt;</option>
+              {projectApps.map((a) => (
+                <option key={a.appId} value={a.appId}>
+                  {a.appName} ({a.appId})
+                </option>
+              ))}
+            </select>
+            {projectApps.find(a => a.appId === appId) && (
+              <div className="mt-1.5 p-2 bg-surface-container-lowest border border-outline-variant rounded text-xs">
+                <div className="text-on-surface-variant mb-1">
+                  {projectApps.find(a => a.appId === appId)?.appDescription}
+                </div>
+                <div className="text-on-surface truncate font-mono text-[10px]">
+                  {projectApps.find(a => a.appId === appId)?.gitUrl}
+                </div>
+              </div>
+            )}
+          </Field>
+          {appId && (
+            <Field label="目标分支">
+              <input
+                placeholder="默认使用应用配置的主分支"
+                className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
+                value={baseBranch}
+                onChange={(e) => setBaseBranch(e.target.value)}
+              />
+            </Field>
+          )}
         </div>
         {err && <p className="mt-2 text-xs text-error shrink-0">{err}</p>}
         <div className="mt-4 flex justify-end gap-2 shrink-0">
@@ -562,7 +625,17 @@ function ImportTaskDialog({
   onClose: () => void;
   onImported: () => void;
 }) {
-  const [appId, setAppId] = useState(apps[0]?.appId ?? 'app-001');
+  const projects = Array.from(new Map(apps.map((a) => [a.projectId, a.projectName])).entries());
+  const [projectId, setProjectId] = useState(projects[0]?.[0] ?? 'project-001');
+  const projectApps = apps.filter((a) => a.projectId === projectId);
+  const [appId, setAppId] = useState('');
+
+  useEffect(() => {
+    const validApps = apps.filter((a) => a.projectId === projectId);
+    if (appId !== '' && !validApps.some((a) => a.appId === appId)) {
+      setAppId('');
+    }
+  }, [projectId, apps, appId]);
   const [source, setSource] = useState('gitlab');
   const [issues, setIssues] = useState<any[]>([]);
   const [selectedIssues, setSelectedIssues] = useState<Set<string>>(new Set());
@@ -600,7 +673,7 @@ function ImportTaskDialog({
       const selected = issues.filter(i => selectedIssues.has(i.id));
       for (const issue of selected) {
         await api.createTask({
-          projectId: 'project-001',
+          projectId,
           requirementId: `REQ-${issue.iid}`,
           title: issue.title,
           content: issue.description,
@@ -629,15 +702,15 @@ function ImportTaskDialog({
         <h2 className="mb-3 text-base font-semibold shrink-0">导入任务</h2>
         <div className="space-y-4 text-sm overflow-auto pr-2 flex-1 flex flex-col">
           <div className="grid grid-cols-2 gap-4 shrink-0">
-            <Field label="导入目标项目 (App)">
+            <Field label="导入目标项目">
               <select
                 className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
-                value={appId}
-                onChange={(e) => setAppId(e.target.value)}
+                value={projectId}
+                onChange={(e) => setProjectId(e.target.value)}
               >
-                {apps.map((a) => (
-                  <option key={a.appId} value={a.appId}>
-                    {a.appName} ({a.appId})
+                {projects.map(([id, name]) => (
+                  <option key={id} value={id}>
+                    {name} ({id})
                   </option>
                 ))}
               </select>
@@ -652,6 +725,30 @@ function ImportTaskDialog({
               </select>
             </Field>
           </div>
+          <Field label="导入目标应用">
+            <select
+              className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
+              value={appId}
+              onChange={(e) => setAppId(e.target.value)}
+            >
+              <option value="">&lt;自动选择&gt;</option>
+              {projectApps.map((a) => (
+                <option key={a.appId} value={a.appId}>
+                  {a.appName} ({a.appId})
+                </option>
+              ))}
+            </select>
+            {projectApps.find(a => a.appId === appId) && (
+              <div className="mt-1.5 p-2 bg-surface-container-lowest border border-outline-variant rounded text-xs">
+                <div className="text-on-surface-variant mb-1">
+                  {projectApps.find(a => a.appId === appId)?.appDescription}
+                </div>
+                <div className="text-on-surface truncate font-mono text-[10px]">
+                  {projectApps.find(a => a.appId === appId)?.gitUrl}
+                </div>
+              </div>
+            )}
+          </Field>
           
           <div className="flex-1 flex flex-col min-h-0 border border-outline-variant rounded bg-surface">
             <div className="p-2 border-b border-outline-variant bg-surface-container-lowest font-medium text-xs text-on-surface-variant flex justify-between">

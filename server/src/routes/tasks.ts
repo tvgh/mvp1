@@ -43,8 +43,8 @@ tasksRouter.get('/tasks/:id', (req, res) => {
 
 tasksRouter.post('/tasks', (req, res) => {
   const body = req.body as Partial<Task>;
-  if (!body.requirementId || !body.title || !body.appId || !body.projectId) {
-    return res.status(400).json({ error: 'requirementId, title, appId, projectId required' });
+  if (!body.requirementId || !body.title || !body.projectId) {
+    return res.status(400).json({ error: 'requirementId, title, projectId required' });
   }
   for (const t of store.tasks.values()) {
     if (
@@ -63,7 +63,7 @@ tasksRouter.post('/tasks', (req, res) => {
     requirementId: body.requirementId!,
     title: body.title!,
     content: body.content ?? '',
-    appId: body.appId!,
+    appId: body.appId,
     planMode: body.planMode ?? true,
     status: body.status ?? 'queued',
     createdAt: nowISO(),
