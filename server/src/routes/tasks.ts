@@ -33,7 +33,7 @@ tasksRouter.get('/tasks', (req, res) => {
 tasksRouter.get('/tasks/:id', (req, res) => {
   const task = store.tasks.get(req.params.id);
   if (!task) return res.status(404).json({ error: 'not found' });
-  const app = store.apps.get(task.appId);
+  const app = task.appId ? store.apps.get(task.appId) : undefined;
   const plans = store.plans.get(task.id) ?? [];
   const latestPlan = getLatestPlan(task.id);
   const review = store.reviews.get(task.id);

@@ -30,28 +30,31 @@ function pickFailure(): boolean {
 }
 
 function step(task: Task) {
-  let app = task.appId ? store.apps.get(task.appId) : undefined;
-  if (!app) {
-    const projectApps = Array.from(store.apps.values()).filter((a) => a.projectId === task.projectId);
-    if (projectApps.length > 0) {
-      app = projectApps[0];
-      task.appId = app.appId;
-    } else {
-      if (task.status === 'queued') {
-        task.failReason = '未找到目标应用';
-        transition(task, 'failed_baseline', task.failReason);
-      }
-      return;
-    }
-  }
-
   switch (task.status) {
     case 'queued': {
-      transition(task, 'locking_baseline', `开始锁定 ${app.appName} 基线`);
+      let app = task.appId ? store.apps.get(task.appId) : undefined;
+      if (!app) {
+        const projectApps = Array.from(store.apps.values()).filter((a) => a.projectId === task.projectId);
+        if (projectApps.length > 0) {
+          app = projectApps[0];
+          task.appId = app.appId;
+        } else {
+          task.failReason = '未找到目标应用';
+          transition(task, 'failed_baseline', task.failReason);
+          return;
+        }
+      }
+
+      // 模拟 1 秒后进入 locking_baseline
+      setTimeout(() => {
+        transition(task, 'locking_baseline', '正在锁定代码基线...');
+      }, 1000);
       break;
     }
 
     case 'locking_baseline': {
+      const app = store.apps.get(task.appId!);
+      if (!app) return;
       task.baseBranch = app.defaultBranch;
       task.baseCommit = randomHex(8);
       transition(
@@ -166,7 +169,7 @@ function step(task: Task) {
         envId,
         envName: `AIWX-${task.requirementId}`,
         envUrl: `https://aiwx-${task.requirementId.toLowerCase()}.example.com`,
-        appId: task.appId,
+        appId: task.appId!,
         taskId: task.id,
         branchName: task.branchName!,
         commitId: task.baseCommit!,
