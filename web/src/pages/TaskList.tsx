@@ -5,6 +5,15 @@ import type { AppInfo } from '../api/types';
 import { StatusBadge, STATUS_LABEL } from '../components/StatusBadge';
 import { useTasks } from '../hooks/useTasks';
 import { useEffect } from 'react';
+import {
+  IMPORT_SOURCE_OPTIONS,
+  IMPORT_SOURCES,
+  gitlabIssueToImportItem,
+  importItemToTaskPayload,
+  securityVulnerabilityToImportItem,
+  type ImportItem,
+  type ImportSource,
+} from '../importSources';
 
 export function TaskList() {
   const navigate = useNavigate();
@@ -627,27 +636,45 @@ function ImportTaskDialog({
 }) {
   const projects = Array.from(new Map(apps.map((a) => [a.projectId, a.projectName])).entries());
   const [projectId, setProjectId] = useState(projects[0]?.[0] ?? 'project-001');
-  const [source, setSource] = useState('gitlab');
-  const [issues, setIssues] = useState<any[]>([]);
+  const [source, setSource] = useState<ImportSource>('gitlab');
+  const [issues, setIssues] = useState<ImportItem[]>([]);
   const [selectedIssues, setSelectedIssues] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [importing, setImporting] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    if (source === 'gitlab' && projectId) {
-      setLoading(true);
-      setErr(null);
-      api.getGitlabIssues(projectId)
-        .then((res) => {
-          setIssues(res.issues);
-          setSelectedIssues(new Set());
-        })
-        .catch((e) => setErr(e.message))
-        .finally(() => setLoading(false));
-    } else {
+    let cancelled = false;
+    if (!projectId) {
       setIssues([]);
+      return;
     }
+
+    setLoading(true);
+    setErr(null);
+    const loadItems =
+      source === 'gitlab'
+        ? api.getGitlabIssues(projectId).then((res) => res.issues.map(gitlabIssueToImportItem))
+        : api
+            .getSecurityVulnerabilities(projectId)
+            .then((res) => res.vulnerabilities.map(securityVulnerabilityToImportItem));
+
+    loadItems
+      .then((items) => {
+        if (cancelled) return;
+        setIssues(items);
+        setSelectedIssues(new Set());
+      })
+      .catch((e) => {
+        if (!cancelled) setErr(e.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [source, projectId]);
 
   const toggleIssue = (id: string) => {
@@ -663,15 +690,7 @@ function ImportTaskDialog({
     try {
       const selected = issues.filter(i => selectedIssues.has(i.id));
       for (const issue of selected) {
-        await api.createTask({
-          projectId,
-          requirementId: `REQ-${issue.iid}`,
-          title: issue.title,
-          content: issue.description,
-          appId: '',
-          planMode: true,
-          status: 'pending_start'
-        });
+        await api.createTask(importItemToTaskPayload(projectId, source, issue));
       }
       onImported();
     } catch (e: any) {
@@ -710,15 +729,19 @@ function ImportTaskDialog({
               <select
                 className="w-full rounded border border-outline-variant bg-surface px-2 py-1.5 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/20"
                 value={source}
-                onChange={(e) => setSource(e.target.value)}
+                onChange={(e) => setSource(e.target.value as ImportSource)}
               >
-                <option value="gitlab">GitLab Issues</option>
+                {IMPORT_SOURCE_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
               </select>
             </Field>
           </div>
           <div className="flex-1 flex flex-col min-h-0 border border-outline-variant rounded bg-surface">
             <div className="p-2 border-b border-outline-variant bg-surface-container-lowest font-medium text-xs text-on-surface-variant flex justify-between">
-              <span>{source === 'gitlab' ? 'GitLab Issues' : 'Issues'}</span>
+              <span>{IMPORT_SOURCES[source].listTitle}</span>
               <span>已选 {selectedIssues.size} 项</span>
             </div>
             <div className="overflow-auto p-2 flex-1">
@@ -737,7 +760,22 @@ function ImportTaskDialog({
                         onChange={() => toggleIssue(issue.id)}
                       />
                       <div className="flex-1 min-w-0">
-                        <div className="font-medium text-on-surface truncate">#{issue.iid} {issue.title}</div>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="font-medium text-on-surface truncate">
+                            {issue.displayId} {issue.title}
+                          </span>
+                          {issue.severityLabel && (
+                            <span className={`shrink-0 rounded border px-1.5 py-0.5 text-[11px] font-medium ${severityClassName(issue.severity)}`}>
+                              {issue.severityLabel}
+                            </span>
+                          )}
+                        </div>
+                        {issue.packageName && (
+                          <div className="text-xs text-on-surface-variant mt-1">
+                            {issue.packageName}
+                            {issue.fixedVersion ? ` · 修复版本 ${issue.fixedVersion}` : ''}
+                          </div>
+                        )}
                         <div className="text-xs text-on-surface-variant line-clamp-2 mt-1">{issue.description}</div>
                       </div>
                     </label>
@@ -766,4 +804,19 @@ function ImportTaskDialog({
       </div>
     </div>
   );
+}
+
+function severityClassName(severity: ImportItem['severity']): string {
+  switch (severity) {
+    case 'critical':
+      return 'border-red-500/40 bg-red-500/10 text-red-600';
+    case 'high':
+      return 'border-orange-500/40 bg-orange-500/10 text-orange-600';
+    case 'medium':
+      return 'border-amber-500/40 bg-amber-500/10 text-amber-700';
+    case 'low':
+      return 'border-emerald-500/40 bg-emerald-500/10 text-emerald-700';
+    default:
+      return 'border-outline-variant bg-surface-container text-on-surface-variant';
+  }
 }

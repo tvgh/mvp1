@@ -1,4 +1,12 @@
-import type { AppInfo, GitlabIssue, LogEntry, Task, TaskDetail, TaskStatus } from './types';
+import type {
+  AppInfo,
+  GitlabIssue,
+  LogEntry,
+  SecurityVulnerability,
+  Task,
+  TaskDetail,
+  TaskStatus,
+} from './types';
 
 async function jsonFetch<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, {
@@ -26,6 +34,10 @@ export const api = {
   getLogs: (id: string) => jsonFetch<{ logs: LogEntry[] }>(`/api/aiwx/tasks/${id}/logs`),
   listApps: () => jsonFetch<{ apps: AppInfo[] }>('/api/apps'),
   getGitlabIssues: (projectId: string) => jsonFetch<{ issues: GitlabIssue[] }>(`/api/gitlab/projects/${projectId}/issues`),
+  getSecurityVulnerabilities: (projectId: string) =>
+    jsonFetch<{ vulnerabilities: SecurityVulnerability[] }>(
+      `/api/security/projects/${projectId}/vulnerabilities`,
+    ),
   createTask: (body: {
     projectId: string;
     requirementId: string;

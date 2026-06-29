@@ -112,3 +112,15 @@ export interface GitlabIssue {
   title: string;
   description: string;
 }
+
+export type SecuritySeverity = 'critical' | 'high' | 'medium' | 'low';
+
+export interface SecurityVulnerability {
+  id: string;
+  vulnId: string;
+  severity: SecuritySeverity;
+  title: string;
+  description: string;
+  packageName: string;
+  fixedVersion?: string;
+}

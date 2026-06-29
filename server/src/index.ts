@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import { appsRouter } from './routes/apps.js';
 import { gitlabRouter } from './routes/gitlab.js';
+import { securityRouter } from './routes/security.js';
 import { tasksRouter } from './routes/tasks.js';
 import { seed } from './seed.js';
 import { config, startSimulator } from './simulator.js';
@@ -24,6 +25,7 @@ app.post('/api/config', (req, res) => {
 app.use('/api/aiwx', tasksRouter);
 app.use('/api', appsRouter);
 app.use('/api/gitlab', gitlabRouter);
+app.use('/api/security', securityRouter);
 
 seed();
 startSimulator();
